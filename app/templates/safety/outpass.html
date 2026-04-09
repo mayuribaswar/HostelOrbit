@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel">
+  <h3>Out-pass Management</h3>
+  <form method="get" class="inline">
+    <select name="status">
+      <option value="" {% if not status %}selected{% endif %}>All Status</option>
+      <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+      <option value="Approved" {% if status == 'Approved' %}selected{% endif %}>Approved</option>
+      <option value="Rejected" {% if status == 'Rejected' %}selected{% endif %}>Rejected</option>
+    </select>
+    <button class="btn">Apply Filter</button>
+  </form>
+  {% if current_user.role == 'student' %}
+  <form method="post" class="grid-form">
+    <input name="reason" placeholder="Reason" required>
+    <input type="date" name="date_from" required>
+    <input type="date" name="date_to" required>
+    <button class="btn">Request Out-pass</button>
+  </form>
+  {% endif %}
+  <table>
+    <thead><tr><th>Student</th><th>Reason</th><th>QR</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for o in records %}
+      <tr>
+        <td>{{ o.student.name }}</td><td>{{ o.reason }}</td><td><code>{{ o.qr_token }}</code></td><td><span class="badge">{{ o.status }}</span></td>
+        <td>{% if current_user.role == 'admin' and o.status == 'Pending' %}<form method="post" action="{{ url_for('safety.decide_outpass', outpass_id=o.id, decision='approve') }}" class="inline"><button class="btn">Approve</button></form><form method="post" action="{{ url_for('safety.decide_outpass', outpass_id=o.id, decision='reject') }}" class="inline"><button class="btn danger">Reject</button></form>{% else %}-{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">No out-pass records found for selected filter.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

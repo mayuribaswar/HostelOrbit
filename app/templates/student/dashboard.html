@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="cards"><div class="card"><h3>Hostel ID</h3><p>{{ current_user.hostel_id }}</p></div><div class="card"><h3>Branch/Year</h3><p>{{ current_user.branch }} / {{ current_user.year }}</p></div><div class="card"><h3>Assigned Room</h3><p>{{ room.room_number if room else 'Not assigned' }}</p></div></section>{% endblock %}

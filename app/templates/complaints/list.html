@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel">
+  <h3>Service Desk</h3>
+  <form method="get" class="inline">
+    <select name="status">
+      <option value="" {% if not status %}selected{% endif %}>All</option>
+      <option value="Open" {% if status == 'Open' %}selected{% endif %}>Open</option>
+      <option value="In Progress" {% if status == 'In Progress' %}selected{% endif %}>In Progress</option>
+      <option value="Resolved" {% if status == 'Resolved' %}selected{% endif %}>Resolved</option>
+    </select>
+    <button class="btn">Filter</button>
+  </form>
+  {% if current_user.role == 'student' %}
+  <form method="post" class="grid-form">
+    <input name="title" placeholder="Complaint title" required>
+    <textarea name="description" placeholder="Describe issue" required></textarea>
+    <button class="btn">Raise Complaint</button>
+  </form>
+  {% endif %}
+  <table>
+    <thead><tr><th>Title</th><th>Student</th><th>Vendor</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for c in complaints %}
+      <tr>
+        <td>{{ c.title }}</td><td>{{ c.student.name }}</td><td>{{ c.vendor }}</td><td><span class="badge">{{ c.status }}</span></td>
+        <td>{% if current_user.role == 'admin' %}<form method="post" action="{{ url_for('complaints.update_complaint', complaint_id=c.id) }}" class="inline"><input name="vendor" value="{{ c.vendor }}"><select name="status"><option value="Open" {% if c.status == 'Open' %}selected{% endif %}>Open</option><option value="In Progress" {% if c.status == 'In Progress' %}selected{% endif %}>In Progress</option><option value="Resolved" {% if c.status == 'Resolved' %}selected{% endif %}>Resolved</option></select><button class="btn">Update</button></form>{% else %}-{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">No complaints found for selected filter.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

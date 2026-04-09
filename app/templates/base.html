@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HostelOrbit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    {% if current_user.is_authenticated %}
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><i class="fa-solid fa-building-shield"></i> <span>HostelOrbit</span></div>
+      <nav class="nav-links">
+        {% if current_user.role == 'admin' %}
+          <a class="{{ 'active' if request.endpoint == 'admin.dashboard' else '' }}" href="{{ url_for('admin.dashboard') }}"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
+          <a class="{{ 'active' if request.endpoint == 'admin.rooms' else '' }}" href="{{ url_for('admin.rooms') }}"><i class="fa-solid fa-door-open"></i><span>Rooms</span></a>
+          <a class="{{ 'active' if request.endpoint == 'admin.assign_room' else '' }}" href="{{ url_for('admin.assign_room') }}"><i class="fa-solid fa-people-roof"></i><span>Assign Room</span></a>
+          <a class="{{ 'active' if request.endpoint == 'finance.fees' else '' }}" href="{{ url_for('finance.fees') }}"><i class="fa-solid fa-file-invoice-dollar"></i><span>Finance</span></a>
+          <a class="{{ 'active' if request.endpoint == 'finance.expenses' else '' }}" href="{{ url_for('finance.expenses') }}"><i class="fa-solid fa-receipt"></i><span>Expenses</span></a>
+          <a class="{{ 'active' if request.endpoint in ['mess.menu', 'mess.waste_tracking'] else '' }}" href="{{ url_for('mess.menu') }}"><i class="fa-solid fa-utensils"></i><span>Mess</span></a>
+          <a class="{{ 'active' if request.endpoint == 'complaints.list_complaints' else '' }}" href="{{ url_for('complaints.list_complaints') }}"><i class="fa-solid fa-headset"></i><span>Complaints</span></a>
+          <a class="{{ 'active' if request.endpoint in ['safety.outpass', 'safety.sos'] else '' }}" href="{{ url_for('safety.outpass') }}"><i class="fa-solid fa-shield-halved"></i><span>Safety</span></a>
+          <a class="{{ 'active' if request.endpoint == 'admin.analytics' else '' }}" href="{{ url_for('admin.analytics') }}"><i class="fa-solid fa-chart-pie"></i><span>Analytics</span></a>
+        {% else %}
+          <a class="{{ 'active' if request.endpoint == 'student.dashboard' else '' }}" href="{{ url_for('student.dashboard') }}"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
+          <a class="{{ 'active' if request.endpoint == 'student.my_room' else '' }}" href="{{ url_for('student.my_room') }}"><i class="fa-solid fa-bed"></i><span>My Room</span></a>
+          <a class="{{ 'active' if request.endpoint == 'finance.fees' else '' }}" href="{{ url_for('finance.fees') }}"><i class="fa-solid fa-wallet"></i><span>Fees</span></a>
+          <a class="{{ 'active' if request.endpoint in ['mess.menu', 'mess.waste_tracking'] else '' }}" href="{{ url_for('mess.menu') }}"><i class="fa-solid fa-bowl-food"></i><span>Mess</span></a>
+          <a class="{{ 'active' if request.endpoint == 'complaints.list_complaints' else '' }}" href="{{ url_for('complaints.list_complaints') }}"><i class="fa-solid fa-comments"></i><span>Complaints</span></a>
+          <a class="{{ 'active' if request.endpoint == 'safety.outpass' else '' }}" href="{{ url_for('safety.outpass') }}"><i class="fa-solid fa-person-walking-arrow-right"></i><span>Out-pass</span></a>
+          <a class="{{ 'active' if request.endpoint == 'safety.sos' else '' }}" href="{{ url_for('safety.sos') }}"><i class="fa-solid fa-triangle-exclamation"></i><span>SOS</span></a>
+          <a class="{{ 'active' if request.endpoint == 'student.marketplace' else '' }}" href="{{ url_for('student.marketplace') }}"><i class="fa-solid fa-store"></i><span>Marketplace</span></a>
+          <a class="{{ 'active' if request.endpoint == 'student.lost_found' else '' }}" href="{{ url_for('student.lost_found') }}"><i class="fa-solid fa-box-open"></i><span>Lost & Found</span></a>
+        {% endif %}
+      </nav>
+      <a class="logout-link" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+    </aside>
+    {% endif %}
+
+    <main class="content">
+      {% if current_user.is_authenticated %}
+      <header class="topbar">
+        <button id="sidebarToggle" class="icon-btn" type="button"><i class="fa-solid fa-bars"></i></button>
+        <h2>{{ current_user.role|title }} Panel</h2>
+        <span class="topbar-user">{{ current_user.name }} · {{ current_user.hostel_id }}</span>
+      </header>
+      {% endif %}
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-wrap">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% if current_user.is_authenticated %}
+      <section class="module-help panel">
+        <h4><i class="fa-solid fa-circle-info"></i> How this page works</h4>
+        {% if request.endpoint == 'admin.dashboard' %}
+          <p>Monitor key hostel KPIs and use the chart to understand workload trends before taking action in module pages.</p>
+        {% elif request.endpoint == 'admin.rooms' %}
+          <p>Create rooms, track occupancy, and delete only empty rooms. Use search and pagination to manage large room lists.</p>
+        {% elif request.endpoint == 'admin.assign_room' %}
+          <p>Assign students to available rooms and use smart-match suggestions for same branch/year roommate compatibility.</p>
+        {% elif request.endpoint == 'finance.fees' %}
+          <p>Admins generate invoices; students pay pending fees using simulated UPI. Use status filter to track paid/pending quickly.</p>
+        {% elif request.endpoint == 'finance.expenses' %}
+          <p>Record operational expenses and review spending history to maintain finance transparency.</p>
+        {% elif request.endpoint == 'mess.menu' %}
+          <p>Admins publish weekly meals; students vote like/dislike to improve future menus.</p>
+        {% elif request.endpoint == 'mess.waste_tracking' %}
+          <p>Track daily food waste trends to optimize meal planning and reduce unnecessary leftovers.</p>
+        {% elif request.endpoint == 'complaints.list_complaints' %}
+          <p>Students raise tickets. Admins assign vendors and move tickets through Open, In Progress, and Resolved stages.</p>
+        {% elif request.endpoint == 'safety.outpass' %}
+          <p>Students request out-pass with dates; admins approve or reject and gate token (QR code) is tracked per request.</p>
+        {% elif request.endpoint == 'safety.sos' %}
+          <p>Use SOS only for emergencies. It triggers a mock alert to security and rector for rapid response simulation.</p>
+        {% elif request.endpoint == 'student.dashboard' %}
+          <p>View your profile snapshot, assigned room, and navigate to service modules like fees, complaints, and safety.</p>
+        {% elif request.endpoint == 'student.my_room' %}
+          <p>Check your current room assignment, occupancy, and available inventory items linked to your room.</p>
+        {% elif request.endpoint == 'student.marketplace' %}
+          <p>Post items for sale and browse student listings. Use search and pages to find relevant items quickly.</p>
+        {% elif request.endpoint == 'student.lost_found' %}
+          <p>Report lost/found items with location details so peers can identify and recover belongings faster.</p>
+        {% elif request.endpoint == 'admin.analytics' %}
+          <p>Analyze complaint resolution and operational counts to guide staffing and process improvements.</p>
+        {% else %}
+          <p>Use this module page to perform related hostel operations. Submit forms and track updates via flash messages.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

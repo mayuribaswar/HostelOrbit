@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="panel"><h3>Analytics Dashboard</h3><p>Lost & Found Reports: <span class="badge">{{ lost_found }}</span></p><canvas id="complaintChart" data-map='{{ status_counts|tojson }}'></canvas></section>{% endblock %}

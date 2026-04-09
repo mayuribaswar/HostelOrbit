@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel">
+  <h3>Weekly Mess Calendar</h3>
+  <form method="get" class="inline">
+    <select name="day">
+      <option value="" {% if not day %}selected{% endif %}>All Days</option>
+      {% for d in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] %}
+      <option value="{{ d }}" {% if day == d %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn">Filter</button>
+  </form>
+  {% if current_user.role == 'admin' %}
+  <form method="post" class="grid-form">
+    <select name="day">{% for d in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] %}<option>{{ d }}</option>{% endfor %}</select>
+    <select name="meal_type"><option>Breakfast</option><option>Lunch</option><option>Dinner</option></select>
+    <input name="item" placeholder="Menu item" required>
+    <button class="btn">Add</button>
+  </form>
+  {% endif %}
+  <table>
+    <thead><tr><th>Day</th><th>Meal</th><th>Item</th><th>Vote</th></tr></thead>
+    <tbody>
+      {% for m in items %}
+      <tr><td>{{ m.day }}</td><td>{{ m.meal_type }}</td><td>{{ m.item }}</td><td>{% if current_user.role == 'student' %}<form method="post" action="{{ url_for('mess.vote', menu_id=m.id) }}" class="inline"><button class="btn" name="rating" value="5">Like</button><button class="btn warning" name="rating" value="2">Dislike</button></form>{% else %}-{% endif %}</td></tr>
+      {% else %}
+      <tr><td colspan="4">No menu items found for selected day.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

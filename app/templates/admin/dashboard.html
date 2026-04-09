@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="cards">
+  <div class="card"><h3>Total Students</h3><p>{{ stats.students }}</p></div>
+  <div class="card"><h3>Rooms</h3><p>{{ stats.rooms }}</p></div>
+  <div class="card"><h3>Open Complaints</h3><p>{{ stats.open_complaints }}</p></div>
+  <div class="card"><h3>Pending Out-passes</h3><p>{{ stats.pending_outpasses }}</p></div>
+  <div class="card"><h3>Pending Fees</h3><p>{{ stats.pending_fees }}</p></div>
+</section>
+
+<section class="panel">
+  <h3>System Snapshot</h3>
+  <p class="muted">Live operational counts across hostel modules.</p>
+  <canvas id="adminChart" data-labels='{{ chart_labels|tojson }}' data-values='{{ chart_values|tojson }}'></canvas>
+</section>
+{% endblock %}
